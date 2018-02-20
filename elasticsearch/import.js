@@ -14,9 +14,9 @@ var emptyToNull = function(str) {
 }
 
 var buildLocation = function(data) {
-  var lon = emptyToNull(data["lat"]);
-  var lat = emptyToNull(data["lng"]);
-  return lon && lat ? [parseFloat(lon), parseFloat(lat)] : [0.0, 0.0];
+  var lon = emptyToNull(data["lng"]);
+  var lat = emptyToNull(data["lat"]);
+  return lon && lat ? [parseFloat(lon), parseFloat(lat)] : null;
 }
 
 let calls = [];
