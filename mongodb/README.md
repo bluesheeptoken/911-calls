@@ -32,7 +32,63 @@ Afin de répondre aux différents problèmes, vous allez avoir besoin de créer 
 À vous de jouer ! Écrivez les requêtes MongoDB permettant de résoudre les problèmes posés.
 
 ```
-TODO : ajouter les requêtes MongoDB ici
+# Create Index # Working
+db.calls.createIndex( { location : "2dsphere" } ) 
+
+# Count title of calls
+db.calls.aggregate([{ $group: { _id: "$title", count: {$sum: 1} } }])
+
+# Count OVERDOSE causes by town
+db.calls.aggregate(
+                     [
+                       { $match: { cause: " OVERDOSE" } },
+                       { $group: { _id: "$twp", total: { $sum: 1 } } },
+                       { $sort: { total: -1 } },
+                       { $limit: 3 }
+                     ]
+                   )
+
+# Count number of cities within a circe
+db.calls.aggregate([
+   {
+     $geoNear: {
+        near: { type: "Point", coordinates: [ -75.283783 , 40.241493 ]  },
+        distanceField: "dist.calculated",
+        maxDistance: 500,
+        includeLocs: "dist.location",
+        num: db.calls.count(),
+        spherical: true
+     }
+   },
+   {$count: "number"}
+])
+
+# First 3 months with most calls
+db.calls.aggregate(
+{
+    "$project": {
+        "y": {
+            "$year": "$@timestamp"
+        },
+        "m": {
+            "$month": "$@timestamp"
+        }
+    }
+},
+{
+    "$group": {
+        "_id": {
+            "year": "$y",
+            "month": "$m",
+            "day": "$d"
+        },
+        total: {
+            "$sum": 1
+        }
+    }
+},
+{ $sort: { total: -1 } })
+
 ```
 
 Vous allez sûrement avoir besoin de vous inspirer des points suivants de la documentation :
