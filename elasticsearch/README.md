@@ -22,12 +22,17 @@ GET <nom de votre index>/_count
 À vous de jouer ! Écrivez les requêtes ElasticSearch permettant de résoudre les problèmes posés.
 
 ```
+# Mapping avant d'importer pour pouvoir la requete sur la geolocalisation
 PUT call
 {
-  "mappings": {
-    "call": {
-      "properties": {
-        "location": {
+  "mappings": 
+  {
+    "call": 
+    {
+      "properties": 
+      {
+        "location": 
+        {
           "type": "geo_point"
         }
       }
@@ -35,60 +40,8 @@ PUT call
   }
 }
 
-# Cause of call
-GET call/call/_search
-{
-    "size": 0,
-    "aggs" : {
-        "title" : {
-            "terms": {
-                "field": "title.keyword"
-            }
-        }
-    }
-}
-
-# Top 3 call for Overdose
-GET call/call/_search
-{
-  "query":
-  {
-    "match":
-    {
-      "cause" : "OVERDOSE"
-    }
-  },
-  "size": 0,
-  "aggs" : {
-    "city" : {
-      "terms": {
-        "field": "twp.keyword",
-        "size": 3
-      }
-    }
-  }
-}
-
-# Histogram call per month
+# Compter le nombre d'appels autour de Lansdale dans un rayon de 500 mètres
 GET call/call/_search?size=0
-{
-  "aggs" : 
-  {
-    "by_month" : 
-    {
-      "date_histogram": 
-      {
-        "field": "@timestamp",
-        "interval":  "month",
-        "format": "YY-MM",
-        "order": {"_count": "desc"}
-      }
-    }
-  }
-}
-
-# Geolocalisation
-GET call/call/_search
 {
   "query":
   {
@@ -105,6 +58,62 @@ GET call/call/_search
           "distance" : "500m",
           "location" : {"lon" : -75.283783, "lat" : 40.241493}
         }
+      }
+    }
+  }
+}
+
+# Compter le nombre d'appels par catégorie
+GET call/call/_search?size=0
+{
+  "aggs" : 
+  {
+    "title" : 
+    {
+      "terms": 
+      {
+          "field": "title.keyword"
+      }
+    }
+  }
+}
+
+# Trouver les 3 mois ayant comptabilisé le plus d'appels
+GET call/call/_search?size=0
+{
+  "aggs" : 
+  {
+    "by_month" : 
+    {
+      "date_histogram": 
+      {
+        "field": "@timestamp",
+        "interval":  "month",
+        "format": "MM/YYYY",
+        "order": {"_count": "desc"}
+      }
+    }
+  }
+}
+
+# Trouver le top 3 des villes avec le plus d'appels pour OVERDOSE
+GET call/call/_search?size=0
+{
+  "query":
+  {
+    "match":
+    {
+      "cause" : "OVERDOSE"
+    }
+  },
+  "aggs" : 
+  {
+    "city" : 
+    {
+      "terms": 
+      {
+        "field": "twp.keyword",
+        "size": 3
       }
     }
   }

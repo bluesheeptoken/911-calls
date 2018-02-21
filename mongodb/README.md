@@ -33,22 +33,10 @@ Afin de répondre aux différents problèmes, vous allez avoir besoin de créer 
 
 ```
 # Create Index # Working
-db.calls.createIndex( { location : "2dsphere" } ) 
+db.calls.createIndex( { location : "2dsphere" } )
+db.calls.createIndex( { cause : "text" } ) 
 
-# Count title of calls
-db.calls.aggregate([{ $group: { _id: "$title", count: {$sum: 1} } }])
-
-# Count OVERDOSE causes by town
-db.calls.aggregate(
-                     [
-                       { $match: { cause: " OVERDOSE" } },
-                       { $group: { _id: "$twp", total: { $sum: 1 } } },
-                       { $sort: { total: -1 } },
-                       { $limit: 3 }
-                     ]
-                   )
-
-# Count number of cities within a circe
+# Compter le nombre d'appels autour de Lansdale dans un rayon de 500 mètres
 db.calls.aggregate([
    {
      $geoNear: {
@@ -63,7 +51,10 @@ db.calls.aggregate([
    {$count: "number"}
 ])
 
-# First 3 months with most calls
+# Compter le nombre d'appels par catégorie
+db.calls.aggregate([{ $group: { _id: "$title", count: {$sum: 1} } }])
+
+# Trouver les 3 mois ayant comptabilisé le plus d'appels
 db.calls.aggregate(
 {
     "$project": {
@@ -79,8 +70,7 @@ db.calls.aggregate(
     "$group": {
         "_id": {
             "year": "$y",
-            "month": "$m",
-            "day": "$d"
+            "month": "$m"
         },
         total: {
             "$sum": 1
@@ -88,6 +78,16 @@ db.calls.aggregate(
     }
 },
 { $sort: { total: -1 } })
+
+# Trouver le top 3 des villes avec le plus d'appels pour OVERDOSE
+db.calls.aggregate(
+                     [
+                       { $match: { cause: " OVERDOSE" } },
+                       { $group: { _id: "$twp", total: { $sum: 1 } } },
+                       { $sort: { total: -1 } },
+                       { $limit: 3 }
+                     ]
+                   )
 
 ```
 
