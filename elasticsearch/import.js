@@ -14,8 +14,8 @@ var emptyToNull = function(str) {
 }
 
 var getDate = function(str) {
-  return new Date(str);
-  /*return new Date(d.valueOf() + d.getTimezoneOffset() * 60000);*/
+  var d = new Date(str);
+  return new Date(d.valueOf() - d.getTimezoneOffset() * 60000);
 }
 
 var buildLocation = function(data) {
